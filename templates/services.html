@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Services - {{ super() }}{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Our Services</h1>
+        <p>Comprehensive Construction Solutions</p>
+    </div>
+</section>
+
+<!-- Services Content -->
+<section class="section">
+    <div class="container">
+        <div class="services-detailed-grid">
+            {% for service in services %}
+            <div class="service-detailed-card">
+                {% if service.image_url %}
+                <div class="service-image">
+                    <img src="{{ service.image_url }}" alt="{{ service.title }}">
+                </div>
+                {% endif %}
+                <div class="service-content">
+                    <div class="service-icon-large">
+                        <i class="fas {{ service.icon if service.icon else 'fa-building' }}"></i>
+                    </div>
+                    <h3>{{ service.title }}</h3>
+                    <p>{{ service.description }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

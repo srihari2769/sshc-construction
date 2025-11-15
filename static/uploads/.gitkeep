@@ -1,0 +1,8 @@
+# This directory stores uploaded images
+
+This folder is used to store images uploaded through the admin panel:
+- Project images
+- Service images  
+- Testimonial photos
+
+The directory is automatically created when needed, but this file ensures it exists in version control.

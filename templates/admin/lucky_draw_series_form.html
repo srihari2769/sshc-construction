@@ -1,0 +1,48 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ 'Edit Series' if series else 'Add Series' }} - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>{{ 'Edit Series' if series else 'Add New Series' }}</h1>
+    <a href="{{ url_for('admin_lucky_draw') }}" class="btn btn-secondary">Back to Series</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST">
+            <div class="form-group">
+                <label>Series Name *</label>
+                <input type="text" name="series_name" class="form-control" 
+                       value="{{ series.series_name if series else '' }}" 
+                       placeholder="e.g., A, B, C..." required maxlength="5">
+            </div>
+            
+            <div class="form-group">
+                <label>Total Tickets *</label>
+                <input type="number" name="total_tickets" class="form-control" 
+                       value="{{ series.total_tickets if series else 5000 }}" 
+                       min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Ticket Price (₹) *</label>
+                <input type="number" name="ticket_price" class="form-control" 
+                       value="{{ series.ticket_price if series else 999 }}" 
+                       min="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" name="active" 
+                           {{ 'checked' if not series or series.active else '' }}>
+                    Active
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">{{ 'Update' if series else 'Add' }} Series</button>
+            <a href="{{ url_for('admin_lucky_draw') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

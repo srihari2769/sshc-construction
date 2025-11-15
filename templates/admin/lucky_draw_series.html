@@ -1,0 +1,81 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Lucky Draw Series - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-content">
+    <div class="admin-header">
+        <h1>Lucky Draw Series Management</h1>
+        <a href="{{ url_for('admin_add_series') }}" class="btn btn-primary">Add New Series</a>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table lucky-draw-series-table">
+                    <thead>
+                        <tr>
+                            <th>Series</th>
+                            <th>Total Tickets</th>
+                            <th>Available</th>
+                            <th>Sold</th>
+                            <th>Price</th>
+                            <th>Status</th>
+                            <th>Draw Date</th>
+                            <th>Winner</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in series %}
+                        <tr>
+                            <td><span class="series-name">{{ s.series_name }}</span></td>
+                            <td>{{ s.total_tickets }}</td>
+                            <td>{{ s.available_tickets }}</td>
+                            <td>{{ s.total_tickets - s.available_tickets }}</td>
+                            <td class="price-cell">₹{{ s.ticket_price }}</td>
+                            <td>
+                                {% if s.active %}
+                                <span class="badge badge-success">Active</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ s.draw_date.strftime('%d %b %Y') if s.draw_date else '-' }}</td>
+                            <td>{{ s.winner_ticket if s.winner_ticket else '-' }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{{ url_for('admin_edit_series', id=s.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                    <button onclick="deleteSeries({{ s.id }})" class="btn btn-sm btn-danger">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function deleteSeries(id) {
+    if (confirm('Are you sure you want to delete this series? All associated tickets will be deleted!')) {
+        fetch(`/admin/lucky-draw/series/delete/${id}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error deleting series: ' + data.message);
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,100 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="dashboard-stats">
+    <div class="stat-card">
+        <div class="stat-icon projects">
+            <i class="fas fa-project-diagram"></i>
+        </div>
+        <div class="stat-details">
+            <h3>{{ projects_count }}</h3>
+            <p>Total Projects</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon services">
+            <i class="fas fa-cogs"></i>
+        </div>
+        <div class="stat-details">
+            <h3>{{ services_count }}</h3>
+            <p>Active Services</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon contacts">
+            <i class="fas fa-envelope"></i>
+        </div>
+        <div class="stat-details">
+            <h3>{{ contacts_count }}</h3>
+            <p>New Contacts</p>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon testimonials">
+            <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-details">
+            <h3>{{ testimonials_count }}</h3>
+            <p>Testimonials</p>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-section">
+    <h2>Recent Contact Inquiries</h2>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Subject</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for contact in recent_contacts %}
+                <tr>
+                    <td>{{ contact.name }}</td>
+                    <td>{{ contact.email }}</td>
+                    <td>{{ contact.subject if contact.subject else 'N/A' }}</td>
+                    <td>{{ contact.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                    <td>
+                        <span class="badge badge-{{ contact.status }}">{{ contact.status }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('admin_contacts') }}" class="btn btn-small">View</a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">No recent contacts</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="dashboard-actions">
+    <a href="{{ url_for('admin_add_project') }}" class="action-card">
+        <i class="fas fa-plus-circle"></i>
+        <h3>Add New Project</h3>
+    </a>
+    <a href="{{ url_for('admin_add_service') }}" class="action-card">
+        <i class="fas fa-plus-circle"></i>
+        <h3>Add New Service</h3>
+    </a>
+    <a href="{{ url_for('admin_add_testimonial') }}" class="action-card">
+        <i class="fas fa-plus-circle"></i>
+        <h3>Add Testimonial</h3>
+    </a>
+</div>
+{% endblock %}

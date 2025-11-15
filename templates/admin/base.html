@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel - SSHC Builders{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-building"></i> SSHC Admin</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('admin_dashboard') }}" class="{% if request.endpoint == 'admin_dashboard' %}active{% endif %}">
+                    <i class="fas fa-home"></i> Dashboard
+                </a>
+                <a href="{{ url_for('admin_projects') }}" class="{% if 'project' in request.endpoint %}active{% endif %}">
+                    <i class="fas fa-project-diagram"></i> Projects
+                </a>
+                <a href="{{ url_for('admin_services') }}" class="{% if 'service' in request.endpoint %}active{% endif %}">
+                    <i class="fas fa-cogs"></i> Services
+                </a>
+                <a href="{{ url_for('admin_testimonials') }}" class="{% if 'testimonial' in request.endpoint %}active{% endif %}">
+                    <i class="fas fa-star"></i> Testimonials
+                </a>
+                <a href="{{ url_for('admin_contacts') }}" class="{% if 'contact' in request.endpoint %}active{% endif %}">
+                    <i class="fas fa-envelope"></i> Contacts
+                </a>
+                <div class="sidebar-section">
+                    <div class="section-title">Lucky Draw</div>
+                    <a href="{{ url_for('admin_lucky_draw') }}" class="{% if 'lucky_draw' in request.endpoint and 'tickets' not in request.endpoint and 'payment' not in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-ticket-alt"></i> Series
+                    </a>
+                    <a href="{{ url_for('admin_lucky_draw_tickets') }}" class="{% if 'lucky_draw_tickets' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-list"></i> Tickets
+                    </a>
+                    <a href="{{ url_for('admin_payment_settings') }}" class="{% if 'payment_settings' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-credit-card"></i> Payment Settings
+                    </a>
+                </div>
+                <a href="{{ url_for('admin_settings') }}" class="{% if request.endpoint == 'admin_settings' %}active{% endif %}">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="{{ url_for('index') }}" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> View Website
+                </a>
+                <a href="{{ url_for('admin_logout') }}">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <div class="admin-header">
+                <h1>{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="admin-user">
+                    <i class="fas fa-user-circle"></i>
+                    <span>{{ current_user.name }}</span>
+                </div>
+            </div>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <span>{{ message }}</span>
+                                <button class="flash-close">&times;</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <div class="admin-content">
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

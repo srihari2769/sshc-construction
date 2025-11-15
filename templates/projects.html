@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Projects - {{ super() }}{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header">
+    <div class="container">
+        <h1>Our Projects</h1>
+        <p>Showcasing Our Work</p>
+    </div>
+</section>
+
+<!-- Projects Filter -->
+<section class="section">
+    <div class="container">
+        <div class="projects-filter">
+            <a href="{{ url_for('projects', category='all') }}" class="filter-btn {% if current_category == 'all' %}active{% endif %}">All</a>
+            {% for category in categories %}
+            <a href="{{ url_for('projects', category=category) }}" class="filter-btn {% if current_category == category %}active{% endif %}">{{ category }}</a>
+            {% endfor %}
+        </div>
+
+        <div class="projects-grid">
+            {% for project in projects %}
+            <div class="project-card">
+                <div class="project-image">
+                    {% if project.image_url %}
+                    <img src="{{ project.image_url }}" alt="{{ project.title }}">
+                    {% else %}
+                    <div class="project-placeholder">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    {% endif %}
+                    <div class="project-overlay">
+                        <a href="{{ url_for('project_detail', id=project.id) }}" class="btn btn-small">View Details</a>
+                    </div>
+                </div>
+                <div class="project-info">
+                    <span class="project-category">{{ project.category }}</span>
+                    <h3>{{ project.title }}</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ project.location if project.location else 'Location TBD' }}</p>
+                    {% if project.completion_date %}
+                    <p><i class="fas fa-calendar"></i> {{ project.completion_date.strftime('%B %Y') }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="no-results">
+                <i class="fas fa-folder-open"></i>
+                <p>No projects found in this category.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Manage Services{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <a href="{{ url_for('admin_add_service') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Service
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Icon</th>
+                <th>Title</th>
+                <th>Order</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for service in services %}
+            <tr>
+                <td><i class="fas {{ service.icon }} fa-2x"></i></td>
+                <td>{{ service.title }}</td>
+                <td>{{ service.order }}</td>
+                <td>
+                    {% if service.active %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('admin_edit_service', id=service.id) }}" class="btn btn-small btn-info">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button onclick="deleteItem('service', {{ service.id }})" class="btn btn-small btn-danger">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="5" class="text-center">No services found. <a href="{{ url_for('admin_add_service') }}">Add your first service</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

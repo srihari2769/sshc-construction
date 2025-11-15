@@ -1,0 +1,59 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Manage Testimonials{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <a href="{{ url_for('admin_add_testimonial') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Testimonial
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Client</th>
+                <th>Company</th>
+                <th>Rating</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for testimonial in testimonials %}
+            <tr>
+                <td>{{ testimonial.client_name }}</td>
+                <td>{{ testimonial.company if testimonial.company else 'N/A' }}</td>
+                <td>
+                    {% for i in range(testimonial.rating) %}
+                    <i class="fas fa-star text-warning"></i>
+                    {% endfor %}
+                </td>
+                <td>
+                    {% if testimonial.active %}
+                    <span class="badge badge-success">Active</span>
+                    {% else %}
+                    <span class="badge badge-danger">Inactive</span>
+                    {% endif %}
+                </td>
+                <td>{{ testimonial.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="{{ url_for('admin_edit_testimonial', id=testimonial.id) }}" class="btn btn-small btn-info">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button onclick="deleteItem('testimonial', {{ testimonial.id }})" class="btn btn-small btn-danger">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center">No testimonials found. <a href="{{ url_for('admin_add_testimonial') }}">Add your first testimonial</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Payment Settings - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Payment Settings</h1>
+    <a href="{{ url_for('admin_lucky_draw') }}" class="btn btn-secondary">Back to Series</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>UPI ID *</label>
+                <input type="text" name="upi_id" class="form-control" 
+                       value="{{ payment_settings.upi_id if payment_settings else '' }}" 
+                       placeholder="yourname@upi" required>
+                <small class="form-text text-muted">Enter your UPI ID for receiving payments</small>
+            </div>
+            
+            <div class="form-group">
+                <label>QR Code Image</label>
+                {% if payment_settings and payment_settings.qr_code_image %}
+                <div class="current-qr">
+                    <p>Current QR Code:</p>
+                    <img src="{{ payment_settings.qr_code_image }}" alt="Current QR Code" style="max-width: 300px; border: 1px solid #ddd; padding: 10px;">
+                </div>
+                {% endif %}
+                <input type="file" name="qr_code_image" class="form-control" accept="image/*">
+                <small class="form-text text-muted">Upload QR code image for payment (Optional)</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Payment Instructions</label>
+                <textarea name="payment_instructions" class="form-control" rows="5">{{ payment_settings.payment_instructions if payment_settings else 'Please complete the payment and upload the screenshot for verification.' }}</textarea>
+                <small class="form-text text-muted">Instructions shown to customers during payment</small>
+            </div>
+            
+            <div class="form-group">
+                <label>Lucky Draw Description</label>
+                <textarea name="lucky_draw_description" class="form-control" rows="8">{{ payment_settings.lucky_draw_description if payment_settings else '' }}</textarea>
+                <small class="form-text text-muted">Description about the lucky draw, prizes, and rules (supports HTML)</small>
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Update Settings</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

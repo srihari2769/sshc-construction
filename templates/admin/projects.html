@@ -1,0 +1,63 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Manage Projects{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <a href="{{ url_for('admin_add_project') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add New Project
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Featured</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td>
+                    {% if project.image_url %}
+                    <img src="{{ project.image_url }}" alt="{{ project.title }}" class="table-thumbnail">
+                    {% else %}
+                    <div class="table-placeholder"><i class="fas fa-image"></i></div>
+                    {% endif %}
+                </td>
+                <td>{{ project.title }}</td>
+                <td><span class="badge">{{ project.category }}</span></td>
+                <td>{{ project.location if project.location else 'N/A' }}</td>
+                <td>
+                    {% if project.featured %}
+                    <i class="fas fa-star text-warning"></i>
+                    {% else %}
+                    <i class="far fa-star"></i>
+                    {% endif %}
+                </td>
+                <td>{{ project.created_at.strftime('%Y-%m-%d') }}</td>
+                <td>
+                    <a href="{{ url_for('admin_edit_project', id=project.id) }}" class="btn btn-small btn-info">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <button onclick="deleteItem('project', {{ project.id }})" class="btn btn-small btn-danger">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">No projects found. <a href="{{ url_for('admin_add_project') }}">Add your first project</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

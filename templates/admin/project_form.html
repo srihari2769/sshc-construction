@@ -1,0 +1,109 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}{{ 'Edit Project' if project else 'Add New Project' }}{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <a href="{{ url_for('admin_projects') }}" class="btn btn-outline">
+        <i class="fas fa-arrow-left"></i> Back to Projects
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="admin-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="title">Project Title *</label>
+                <input type="text" id="title" name="title" value="{{ project.title if project else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category *</label>
+                <input type="text" id="category" name="category" value="{{ project.category if project else '' }}" placeholder="e.g., Residential, Commercial" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" value="{{ project.location if project else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="client_name">Client Name</label>
+                <input type="text" id="client_name" name="client_name" value="{{ project.client_name if project else '' }}">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="completion_date">Completion Date</label>
+                <input type="date" id="completion_date" name="completion_date" value="{{ project.completion_date.strftime('%Y-%m-%d') if project and project.completion_date else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="image">Main Project Image (Thumbnail)</label>
+                <input type="file" id="image" name="image" accept="image/*">
+                {% if project and project.image_url %}
+                <p class="form-help">Current: <a href="{{ project.image_url }}" target="_blank">View Image</a></p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="images">Additional Project Images</label>
+            <input type="file" id="images" name="images" accept="image/*" multiple>
+            <p class="form-help">You can select multiple images at once (Ctrl+Click or Shift+Click)</p>
+            {% if project and project.media %}
+            <div class="media-preview">
+                {% for media in project.media %}
+                    {% if media.file_type == 'image' %}
+                    <div class="media-item">
+                        <img src="{{ media.file_url }}" alt="Project media">
+                        <button type="button" class="btn-remove-media" onclick="removeMedia({{ media.id }})">×</button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="videos">Project Videos</label>
+            <input type="file" id="videos" name="videos" accept="video/*" multiple>
+            <p class="form-help">You can select multiple videos at once (Supported: MP4, AVI, MOV, WebM)</p>
+            {% if project and project.media %}
+            <div class="media-preview">
+                {% for media in project.media %}
+                    {% if media.file_type == 'video' %}
+                    <div class="media-item">
+                        <video src="{{ media.file_url }}" controls></video>
+                        <button type="button" class="btn-remove-media" onclick="removeMedia({{ media.id }})">×</button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description *</label>
+            <textarea id="description" name="description" rows="6" required>{{ project.description if project else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="checkbox-label">
+                <input type="checkbox" name="featured" {{ 'checked' if project and project.featured else '' }}>
+                <span>Featured Project</span>
+            </label>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> {{ 'Update Project' if project else 'Add Project' }}
+            </button>
+            <a href="{{ url_for('admin_projects') }}" class="btn btn-outline">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

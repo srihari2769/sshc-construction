@@ -1,0 +1,370 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Lucky Draw Tickets - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Lucky Draw Tickets</h1>
+    <div class="filter-buttons">
+        <a href="{{ url_for('admin_lucky_draw_tickets') }}" 
+           class="btn btn-sm {{ 'btn-primary' if not current_status else 'btn-outline-primary' }}">All</a>
+        <a href="{{ url_for('admin_lucky_draw_tickets', status='pending') }}" 
+           class="btn btn-sm {{ 'btn-warning' if current_status == 'pending' else 'btn-outline-warning' }}">Pending</a>
+        <a href="{{ url_for('admin_lucky_draw_tickets', status='confirmed') }}" 
+           class="btn btn-sm {{ 'btn-success' if current_status == 'confirmed' else 'btn-outline-success' }}">Confirmed</a>
+        <a href="{{ url_for('admin_lucky_draw_tickets', status='cancelled') }}" 
+           class="btn btn-sm {{ 'btn-danger' if current_status == 'cancelled' else 'btn-outline-danger' }}">Cancelled</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Ticket #</th>
+                        <th>Customer</th>
+                        <th>Payment</th>
+                        <th>Purchase Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td><strong>{{ ticket.ticket_number }}</strong></td>
+                        <td>
+                            <div class="customer-cell">
+                                <strong>{{ ticket.customer_name }}</strong><br>
+                                <small class="customer-email">{{ ticket.customer_email }}</small>
+                            </div>
+                        </td>
+                        <td>{{ ticket.payment_method.upper() }}</td>
+                        <td>{{ ticket.purchase_date.strftime('%d %b %Y %H:%M') }}</td>
+                        <td>
+                            {% if ticket.status == 'pending' %}
+                            <span class="badge badge-warning">Pending</span>
+                            {% elif ticket.status == 'confirmed' %}
+                            <span class="badge badge-success">Confirmed</span>
+                            {% else %}
+                            <span class="badge badge-danger">Cancelled</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-info" onclick="viewTicketDetails({{ ticket.id }})" title="View Details">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                                {% if ticket.status == 'pending' %}
+                                <button class="btn btn-sm btn-success" data-action="confirm" data-id="{{ ticket.id }}" title="Confirm Ticket">
+                                    <i class="fas fa-check"></i> Confirm
+                                </button>
+                                <button class="btn btn-sm btn-warning" data-action="cancel" data-id="{{ ticket.id }}" title="Cancel Ticket">
+                                    <i class="fas fa-times"></i> Cancel
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-sm btn-danger" onclick="deleteTicket({{ ticket.id }})" title="Delete Ticket">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.table-responsive {
+    overflow-x: auto;
+}
+
+.badge {
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.85em;
+}
+
+.badge-warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.badge-success {
+    background: #28a745;
+    color: white;
+}
+
+.badge-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    white-space: nowrap;
+}
+
+.table th:nth-child(1) { width: 100px; }
+.table th:nth-child(2) { width: 200px; }
+.table th:nth-child(3) { width: 80px; }
+.table th:nth-child(4) { width: 150px; }
+.table th:nth-child(5) { width: 100px; }
+.table th:nth-child(6) { width: 320px; }
+
+.customer-cell {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.customer-email {
+    color: #666;
+}
+</style>
+
+<script>
+document.querySelectorAll('[data-action]').forEach(button => {
+    button.addEventListener('click', function() {
+        const action = this.dataset.action;
+        const id = this.dataset.id;
+        const message = action === 'confirm' 
+            ? 'Confirm this ticket? Customer will receive email notification.' 
+            : 'Cancel this ticket? The ticket will be returned to available pool.';
+        
+        if (confirm(message)) {
+            fetch(`/admin/lucky-draw/tickets/${action}/${id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            });
+        }
+    });
+});
+
+function deleteTicket(ticketId) {
+    if (confirm('Are you sure you want to delete this ticket? This action cannot be undone.')) {
+        fetch(`/admin/lucky-draw/tickets/delete/${ticketId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + data.message);
+            }
+        });
+    }
+}
+</script>
+
+<!-- Ticket Details Modal -->
+<div id="ticketModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2>Ticket Details</h2>
+        <div id="ticketDetailsContent"></div>
+    </div>
+</div>
+
+<style>
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 30px;
+    border: 1px solid #888;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 800px;
+    position: relative;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 20px;
+}
+
+.close:hover,
+.close:focus {
+    color: #000;
+}
+
+.detail-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 15px;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+}
+
+.detail-value {
+    color: #333;
+}
+
+.screenshot-preview {
+    max-width: 100%;
+    max-height: 500px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+</style>
+
+<script>
+function viewTicketDetails(ticketId) {
+    fetch(`/admin/lucky-draw/tickets/view/${ticketId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Ticket data received:', data);
+            if (data.success) {
+                const ticket = data.ticket;
+                console.log('Payment screenshot path:', ticket.payment_screenshot);
+                let html = `
+                    <div class="detail-row">
+                        <div class="detail-label">Ticket Number:</div>
+                        <div class="detail-value"><strong>${ticket.ticket_number}</strong></div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Series:</div>
+                        <div class="detail-value">${ticket.series}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Customer Name:</div>
+                        <div class="detail-value">${ticket.customer_name}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${ticket.customer_email}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Phone:</div>
+                        <div class="detail-value">${ticket.customer_phone}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Address:</div>
+                        <div class="detail-value">${ticket.customer_address || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Method:</div>
+                        <div class="detail-value">${ticket.payment_method.toUpperCase()}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Transaction ID:</div>
+                        <div class="detail-value">${ticket.transaction_id || '-'}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Purchase Date:</div>
+                        <div class="detail-value">${ticket.purchase_date}</div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-label">Status:</div>
+                        <div class="detail-value"><span class="badge badge-${ticket.status === 'confirmed' ? 'success' : ticket.status === 'pending' ? 'warning' : 'danger'}">${ticket.status.toUpperCase()}</span></div>
+                    </div>
+                    ${ticket.confirmed_date ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Confirmed Date:</div>
+                        <div class="detail-value">${ticket.confirmed_date}</div>
+                    </div>
+                    ` : ''}
+                `;
+                
+                // Add payment screenshot section if available
+                if (ticket.payment_screenshot && ticket.payment_screenshot.trim() !== '') {
+                    html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Screenshot:</div>
+                        <div class="detail-value">
+                            <a href="${ticket.payment_screenshot}" target="_blank" class="btn btn-sm btn-primary">Open Full Size</a>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; text-align: center;">
+                        <img src="${ticket.payment_screenshot}" alt="Payment Screenshot" class="screenshot-preview" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <div style="display: none; color: red; padding: 20px; background: #ffebee; border-radius: 5px;">
+                            Unable to load screenshot. The image file may be missing or corrupted.
+                        </div>
+                    </div>
+                    `;
+                } else {
+                    html += `
+                    <div class="detail-row">
+                        <div class="detail-label">Payment Screenshot:</div>
+                        <div class="detail-value" style="color: #999;">No screenshot uploaded</div>
+                    </div>
+                    `;
+                }
+                
+                document.getElementById('ticketDetailsContent').innerHTML = html;
+                document.getElementById('ticketModal').style.display = 'block';
+            } else {
+                alert('Error loading ticket details');
+            }
+        });
+}
+
+function closeModal() {
+    document.getElementById('ticketModal').style.display = 'none';
+}
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('ticketModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
+</script>
+{% endblock %}

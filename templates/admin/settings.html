@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+
+{% block page_title %}Company Settings{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <form method="POST" class="admin-form">
+        <h3>Company Information</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="company_name">Company Name *</label>
+                <input type="text" id="company_name" name="company_name" value="{{ company_info.company_name if company_info else '' }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="tagline">Tagline</label>
+                <input type="text" id="tagline" name="tagline" value="{{ company_info.tagline if company_info else '' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="about">About Us</label>
+            <textarea id="about" name="about" rows="6">{{ company_info.about if company_info else '' }}</textarea>
+        </div>
+
+        <h3>Contact Information</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" name="phone" value="{{ company_info.phone if company_info else '' }}">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" value="{{ company_info.email if company_info else '' }}">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Address</label>
+            <textarea id="address" name="address" rows="3">{{ company_info.address if company_info else '' }}</textarea>
+        </div>
+
+        <h3>Social Media Links</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label for="facebook">Facebook</label>
+                <input type="url" id="facebook" name="facebook" value="{{ company_info.facebook if company_info else '' }}" placeholder="https://facebook.com/yourpage">
+            </div>
+
+            <div class="form-group">
+                <label for="twitter">Twitter</label>
+                <input type="url" id="twitter" name="twitter" value="{{ company_info.twitter if company_info else '' }}" placeholder="https://twitter.com/yourpage">
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="linkedin">LinkedIn</label>
+                <input type="url" id="linkedin" name="linkedin" value="{{ company_info.linkedin if company_info else '' }}" placeholder="https://linkedin.com/company/yourpage">
+            </div>
+
+            <div class="form-group">
+                <label for="instagram">Instagram</label>
+                <input type="url" id="instagram" name="instagram" value="{{ company_info.instagram if company_info else '' }}" placeholder="https://instagram.com/yourpage">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="youtube">YouTube</label>
+            <input type="url" id="youtube" name="youtube" value="{{ company_info.youtube if company_info else '' }}" placeholder="https://youtube.com/yourchannel">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
