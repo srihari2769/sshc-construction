@@ -34,85 +34,106 @@ def allowed_video(filename):
 
 def send_ticket_confirmation_email(ticket):
     """Send confirmation email to customer when ticket is confirmed"""
-    if not app.config.get('MAIL_USERNAME'):
-        print("Email not configured. Skipping email sending.")
-        return
-    
-    company_info = CompanyInfo.query.first()
-    company_name = company_info.company_name if company_info else "Sri Shanmukha Harayanaraya Constructions"
-    
-    subject = f"Lucky Draw Ticket {ticket.ticket_number} - Confirmed!"
-    
-    html_body = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-            .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
-            .ticket-info {{ background: white; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; }}
-            .ticket-number {{ font-size: 32px; font-weight: bold; color: #667eea; text-align: center; margin: 20px 0; }}
-            .info-row {{ padding: 10px 0; border-bottom: 1px solid #eee; }}
-            .label {{ font-weight: 600; color: #555; }}
-            .footer {{ text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="header">
-                <h1>🎉 Ticket Confirmed!</h1>
-                <p>Your Lucky Draw ticket has been confirmed</p>
-            </div>
-            <div class="content">
-                <div class="ticket-number">{ticket.ticket_number}</div>
-                
-                <div class="ticket-info">
-                    <h2 style="color: #667eea; margin-top: 0;">Ticket Details</h2>
-                    <div class="info-row">
-                        <span class="label">Customer Name:</span> {ticket.customer_name}
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Series:</span> {ticket.series.series_name}
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Purchase Date:</span> {ticket.purchase_date.strftime('%d %B %Y at %H:%M')}
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Confirmed Date:</span> {ticket.confirmed_date.strftime('%d %B %Y at %H:%M')}
-                    </div>
-                    <div class="info-row">
-                        <span class="label">Status:</span> <strong style="color: #28a745;">CONFIRMED</strong>
-                    </div>
+    try:
+        # Check email configuration
+        if not app.config.get('MAIL_USERNAME'):
+            print("❌ ERROR: Email not configured. MAIL_USERNAME is missing.")
+            raise ValueError("Email configuration missing: MAIL_USERNAME not set")
+        
+        if not app.config.get('MAIL_PASSWORD'):
+            print("❌ ERROR: Email not configured. MAIL_PASSWORD is missing.")
+            raise ValueError("Email configuration missing: MAIL_PASSWORD not set")
+        
+        print(f"📧 Preparing to send email to: {ticket.customer_email}")
+        print(f"📧 Mail server: {app.config.get('MAIL_SERVER')}")
+        print(f"📧 Mail port: {app.config.get('MAIL_PORT')}")
+        print(f"📧 Mail username: {app.config.get('MAIL_USERNAME')}")
+        print(f"📧 TLS enabled: {app.config.get('MAIL_USE_TLS')}")
+        
+        company_info = CompanyInfo.query.first()
+        company_name = company_info.company_name if company_info else "Sri Shanmukha Harayanaraya Constructions"
+        
+        subject = f"Lucky Draw Ticket {ticket.ticket_number} - Confirmed!"
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <style>
+                body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                .ticket-info {{ background: white; padding: 20px; border-left: 4px solid #667eea; margin: 20px 0; }}
+                .ticket-number {{ font-size: 32px; font-weight: bold; color: #667eea; text-align: center; margin: 20px 0; }}
+                .info-row {{ padding: 10px 0; border-bottom: 1px solid #eee; }}
+                .label {{ font-weight: 600; color: #555; }}
+                .footer {{ text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h1>🎉 Ticket Confirmed!</h1>
+                    <p>Your Lucky Draw ticket has been confirmed</p>
                 </div>
-                
-                <p style="margin-top: 30px;">
-                    Congratulations! Your ticket has been successfully confirmed. 
-                    Please keep this email for your records. The draw date will be announced soon.
-                </p>
-                
-                <p style="color: #667eea; font-weight: 600;">
-                    Good luck! 🍀
-                </p>
+                <div class="content">
+                    <div class="ticket-number">{ticket.ticket_number}</div>
+                    
+                    <div class="ticket-info">
+                        <h2 style="color: #667eea; margin-top: 0;">Ticket Details</h2>
+                        <div class="info-row">
+                            <span class="label">Customer Name:</span> {ticket.customer_name}
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Series:</span> {ticket.series.series_name}
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Purchase Date:</span> {ticket.purchase_date.strftime('%d %B %Y at %H:%M')}
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Confirmed Date:</span> {ticket.confirmed_date.strftime('%d %B %Y at %H:%M')}
+                        </div>
+                        <div class="info-row">
+                            <span class="label">Status:</span> <strong style="color: #28a745;">CONFIRMED</strong>
+                        </div>
+                    </div>
+                    
+                    <p style="margin-top: 30px;">
+                        Congratulations! Your ticket has been successfully confirmed. 
+                        Please keep this email for your records. The draw date will be announced soon.
+                    </p>
+                    
+                    <p style="color: #667eea; font-weight: 600;">
+                        Good luck! 🍀
+                    </p>
+                </div>
+                <div class="footer">
+                    <p>{company_name}</p>
+                    <p style="font-size: 12px;">This is an automated email. Please do not reply.</p>
+                </div>
             </div>
-            <div class="footer">
-                <p>{company_name}</p>
-                <p style="font-size: 12px;">This is an automated email. Please do not reply.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
-    
-    msg = Message(
-        subject=subject,
-        recipients=[ticket.customer_email],
-        html=html_body
-    )
-    
-    mail.send(msg)
-    print(f"Confirmation email sent to {ticket.customer_email}")
+        </body>
+        </html>
+        """
+        
+        print(f"📧 Creating email message...")
+        msg = Message(
+            subject=subject,
+            sender=app.config.get('MAIL_DEFAULT_SENDER') or app.config.get('MAIL_USERNAME'),
+            recipients=[ticket.customer_email],
+            html=html_body
+        )
+        
+        print(f"📧 Sending email via Flask-Mail...")
+        mail.send(msg)
+        print(f"✅ SUCCESS: Confirmation email sent to {ticket.customer_email}")
+        
+    except Exception as e:
+        print(f"❌ ERROR sending email: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise
 
 # Public Routes
 @app.route('/')
@@ -845,11 +866,13 @@ def admin_confirm_ticket(id):
     
     # Send email notification to customer
     try:
+        print(f"🎫 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
         send_ticket_confirmation_email(ticket)
-        flash(f'Ticket {ticket.ticket_number} confirmed successfully! Email sent to customer.', 'success')
+        flash(f'Ticket {ticket.ticket_number} confirmed successfully! Email sent to {ticket.customer_email}', 'success')
     except Exception as e:
-        print(f"Email sending failed: {e}")
-        flash(f'Ticket {ticket.ticket_number} confirmed successfully! But email could not be sent.', 'warning')
+        error_msg = f"{type(e).__name__}: {str(e)}"
+        print(f"❌ Email sending failed: {error_msg}")
+        flash(f'Ticket {ticket.ticket_number} confirmed successfully! But email could not be sent. Error: {error_msg}', 'warning')
     
     return jsonify({'success': True})
 
