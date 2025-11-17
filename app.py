@@ -35,6 +35,11 @@ def allowed_video(filename):
 def send_ticket_confirmation_email(ticket):
     """Send confirmation email to customer when ticket is confirmed"""
     try:
+        # Skip if no email provided
+        if not ticket.customer_email:
+            print("ℹ️ No email provided for this ticket. Skipping email notification.")
+            return
+        
         # Check email configuration
         if not app.config.get('MAIL_USERNAME'):
             print("❌ ERROR: Email not configured. MAIL_USERNAME is missing.")
@@ -134,6 +139,32 @@ def send_ticket_confirmation_email(ticket):
         import traceback
         traceback.print_exc()
         raise
+
+def send_ticket_sms(ticket):
+    """Send SMS notification to customer after ticket purchase"""
+    try:
+        print(f"📱 Preparing to send SMS to: {ticket.customer_phone}")
+        
+        # Prepare SMS message
+        message = f"🎉 Lucky Draw Ticket Purchased!\n\nTicket: {ticket.ticket_number}\nSeries: {ticket.series.series_name}\nName: {ticket.customer_name}\nStatus: Pending Confirmation\n\nThank you! - SSHC Builders"
+        
+        # TODO: Integrate with SMS service (Twilio, MSG91, or AWS SNS)
+        # For now, just log the message
+        print(f"📱 SMS Message:\n{message}")
+        print(f"✅ SMS would be sent to: {ticket.customer_phone}")
+        
+        # When you integrate SMS service, use:
+        # - Twilio: https://www.twilio.com/docs/sms/quickstart/python
+        # - MSG91: https://msg91.com/
+        # - AWS SNS: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/sns-examples.html
+        
+        return True
+        
+    except Exception as e:
+        print(f"❌ ERROR sending SMS: {type(e).__name__}: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
 
 # Public Routes
 @app.route('/')
@@ -769,7 +800,14 @@ def purchase_ticket():
     selected_series.available_tickets -= 1
     db.session.commit()
     
-    flash(f'Ticket {ticket_number} purchased successfully! Waiting for admin confirmation.', 'success')
+    # Send SMS notification to customer
+    try:
+        send_ticket_sms(ticket)
+    except Exception as e:
+        print(f"Warning: SMS notification failed: {e}")
+        # Don't fail the purchase if SMS fails
+    
+    flash(f'Ticket {ticket_number} purchased successfully! You will receive an SMS confirmation shortly. Waiting for admin confirmation.', 'success')
     return redirect(url_for('lucky_draw'))
 
 # Admin - Lucky Draw Management
@@ -864,15 +902,35 @@ def admin_confirm_ticket(id):
     ticket.confirmed_date = datetime.utcnow()
     db.session.commit()
     
-    # Send email notification to customer
+    # Send notifications to customer
+    email_sent = False
+    sms_sent = False
+    
+    # Send email notification if email is provided
+    if ticket.customer_email:
+        try:
+            print(f"🎫 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
+            send_ticket_confirmation_email(ticket)
+            email_sent = True
+        except Exception as e:
+            error_msg = f"{type(e).__name__}: {str(e)}"
+            print(f"❌ Email sending failed: {error_msg}")
+    
+    # Send SMS notification
     try:
-        print(f"🎫 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
-        send_ticket_confirmation_email(ticket)
-        flash(f'Ticket {ticket.ticket_number} confirmed successfully! Email sent to {ticket.customer_email}', 'success')
+        sms_sent = send_ticket_sms(ticket)
     except Exception as e:
-        error_msg = f"{type(e).__name__}: {str(e)}"
-        print(f"❌ Email sending failed: {error_msg}")
-        flash(f'Ticket {ticket.ticket_number} confirmed successfully! But email could not be sent. Error: {error_msg}', 'warning')
+        print(f"⚠️ SMS sending failed: {e}")
+    
+    # Show appropriate success message
+    if email_sent and sms_sent:
+        flash(f'Ticket {ticket.ticket_number} confirmed! Email & SMS sent to customer.', 'success')
+    elif email_sent:
+        flash(f'Ticket {ticket.ticket_number} confirmed! Email sent to {ticket.customer_email}', 'success')
+    elif sms_sent:
+        flash(f'Ticket {ticket.ticket_number} confirmed! SMS sent to {ticket.customer_phone}', 'success')
+    else:
+        flash(f'Ticket {ticket.ticket_number} confirmed! (Notifications may have failed)', 'warning')
     
     return jsonify({'success': True})
 

@@ -145,7 +145,7 @@ class LuckyDrawTicket(db.Model):
     ticket_number = db.Column(db.String(20), unique=True, nullable=False)  # e.g., A-0001
     series_id = db.Column(db.Integer, db.ForeignKey('lucky_draw_series.id'), nullable=False)
     customer_name = db.Column(db.String(100), nullable=False)
-    customer_email = db.Column(db.String(120), nullable=False)
+    customer_email = db.Column(db.String(120), nullable=True)  # Made optional for SMS-only flow
     customer_phone = db.Column(db.String(20), nullable=False)
     customer_address = db.Column(db.Text)
     payment_method = db.Column(db.String(20), default='upi')  # upi, qr
