@@ -931,9 +931,16 @@ def admin_confirm_ticket(id):
         return jsonify({'success': False, 'message': 'Access denied'}), 403
     
     ticket = LuckyDrawTicket.query.get_or_404(id)
+    
+    print(f"🎫 Admin confirming ticket {ticket.ticket_number}")
+    print(f"   Current status: {ticket.status}")
+    print(f"   Customer phone: {ticket.customer_phone}")
+    
     ticket.status = 'confirmed'
     ticket.confirmed_date = datetime.utcnow()
     db.session.commit()
+    
+    print(f"   New status: {ticket.status}")
     
     # Send notifications to customer
     email_sent = False
@@ -942,7 +949,7 @@ def admin_confirm_ticket(id):
     # Send email notification if email is provided
     if ticket.customer_email:
         try:
-            print(f"🎫 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
+            print(f"📧 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
             send_ticket_confirmation_email(ticket)
             email_sent = True
         except Exception as e:
@@ -951,9 +958,13 @@ def admin_confirm_ticket(id):
     
     # Send SMS notification
     try:
+        print(f"📱 Attempting to send confirmation SMS...")
         sms_sent = send_ticket_sms(ticket)
+        print(f"   SMS sent status: {sms_sent}")
     except Exception as e:
-        print(f"⚠️ SMS sending failed: {e}")
+        print(f"❌ SMS sending failed with exception: {e}")
+        import traceback
+        traceback.print_exc()
     
     # Show appropriate success message
     if email_sent and sms_sent:
