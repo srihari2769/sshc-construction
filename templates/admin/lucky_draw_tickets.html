@@ -38,7 +38,7 @@
                         <td>
                             <div class="customer-cell">
                                 <strong>{{ ticket.customer_name }}</strong><br>
-                                <small class="customer-email">{{ ticket.customer_email }}</small>
+                                <small class="customer-phone">📱 {{ ticket.customer_phone }}</small>
                             </div>
                         </td>
                         <td>{{ ticket.payment_method.upper() }}</td>
@@ -139,7 +139,7 @@
     text-overflow: ellipsis;
 }
 
-.customer-email {
+.customer-phone {
     color: #666;
 }
 </style>
@@ -150,7 +150,7 @@ document.querySelectorAll('[data-action]').forEach(button => {
         const action = this.dataset.action;
         const id = this.dataset.id;
         const message = action === 'confirm' 
-            ? 'Confirm this ticket? Customer will receive email notification.' 
+            ? 'Confirm this ticket? Customer will receive SMS notification.' 
             : 'Cancel this ticket? The ticket will be returned to available pool.';
         
         if (confirm(message)) {
@@ -287,13 +287,15 @@ function viewTicketDetails(ticketId) {
                         <div class="detail-value">${ticket.customer_name}</div>
                     </div>
                     <div class="detail-row">
-                        <div class="detail-label">Email:</div>
-                        <div class="detail-value">${ticket.customer_email}</div>
-                    </div>
-                    <div class="detail-row">
                         <div class="detail-label">Phone:</div>
                         <div class="detail-value">${ticket.customer_phone}</div>
                     </div>
+                    ${ticket.customer_email ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Email:</div>
+                        <div class="detail-value">${ticket.customer_email}</div>
+                    </div>
+                    ` : ''}
                     <div class="detail-row">
                         <div class="detail-label">Address:</div>
                         <div class="detail-value">${ticket.customer_address || '-'}</div>
