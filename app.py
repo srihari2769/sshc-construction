@@ -942,21 +942,8 @@ def admin_confirm_ticket(id):
     
     print(f"   New status: {ticket.status}")
     
-    # Send notifications to customer
-    email_sent = False
+    # Send SMS notification (email removed to prevent worker timeout)
     sms_sent = False
-    
-    # Send email notification if email is provided
-    if ticket.customer_email:
-        try:
-            print(f"📧 Ticket {ticket.ticket_number} confirmed. Attempting to send email...")
-            send_ticket_confirmation_email(ticket)
-            email_sent = True
-        except Exception as e:
-            error_msg = f"{type(e).__name__}: {str(e)}"
-            print(f"❌ Email sending failed: {error_msg}")
-    
-    # Send SMS notification
     try:
         print(f"📱 Attempting to send confirmation SMS...")
         sms_sent = send_ticket_sms(ticket)
@@ -966,15 +953,11 @@ def admin_confirm_ticket(id):
         import traceback
         traceback.print_exc()
     
-    # Show appropriate success message
-    if email_sent and sms_sent:
-        flash(f'Ticket {ticket.ticket_number} confirmed! Email & SMS sent to customer.', 'success')
-    elif email_sent:
-        flash(f'Ticket {ticket.ticket_number} confirmed! Email sent to {ticket.customer_email}', 'success')
-    elif sms_sent:
+    # Show success message
+    if sms_sent:
         flash(f'Ticket {ticket.ticket_number} confirmed! SMS sent to {ticket.customer_phone}', 'success')
     else:
-        flash(f'Ticket {ticket.ticket_number} confirmed! (Notifications may have failed)', 'warning')
+        flash(f'Ticket {ticket.ticket_number} confirmed! (SMS notification may have failed)', 'warning')
     
     return jsonify({'success': True})
 
