@@ -175,27 +175,11 @@ def send_ticket_sms(ticket):
             else:
                 customer_phone = '+91' + customer_phone
         
-        # Prepare SMS message
+        # Prepare SMS message (short for trial account limits)
         if ticket.status == 'confirmed':
-            message_body = f"""🎉 CONFIRMED - Lucky Draw Ticket!
-
-Ticket: {ticket.ticket_number}
-Series: {ticket.series.series_name}
-Name: {ticket.customer_name}
-Status: CONFIRMED ✅
-
-Good luck in the draw!
-- SSHC Builders"""
+            message_body = f"SSHC Lucky Draw CONFIRMED! Ticket: {ticket.ticket_number}, Series: {ticket.series.series_name}. Good luck!"
         else:
-            message_body = f"""🎫 Lucky Draw Ticket Purchased!
-
-Ticket: {ticket.ticket_number}
-Series: {ticket.series.series_name}
-Name: {ticket.customer_name}
-Status: Pending Admin Confirmation
-
-You will receive another SMS once confirmed.
-Thank you! - SSHC Builders"""
+            message_body = f"SSHC Ticket {ticket.ticket_number} purchased (Series {ticket.series.series_name}). Awaiting confirmation."
         
         # Send SMS via Twilio
         print(f"📱 Sending SMS via Twilio...")
