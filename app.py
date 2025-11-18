@@ -3,7 +3,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_mail import Mail, Message
 from werkzeug.utils import secure_filename
 from config import Config
-from models import db, User, Project, ProjectMedia, Service, Testimonial, Contact, CompanyInfo, LuckyDrawSeries, LuckyDrawTicket, PaymentSettings
+from models import db, User, Project, ProjectMedia, Service, Testimonial, Contact, CompanyInfo, LuckyDrawSeries, LuckyDrawTicket, PaymentSettings, PropertyDocument, LuckyDrawSettings
 import os
 import random
 import string
@@ -755,7 +755,16 @@ def lucky_draw():
     company_info = CompanyInfo.query.first()
     active_series = LuckyDrawSeries.query.filter_by(active=True).all()
     payment_settings = PaymentSettings.query.first()
-    return render_template('lucky_draw.html', company_info=company_info, active_series=active_series, payment_settings=payment_settings)
+    documents = PropertyDocument.query.filter_by(active=True).order_by(PropertyDocument.order).all()
+    settings = LuckyDrawSettings.query.first()
+    if not settings:
+        settings = LuckyDrawSettings(ticket_price=999)
+    return render_template('lucky_draw.html', 
+                         company_info=company_info, 
+                         active_series=active_series, 
+                         payment_settings=payment_settings,
+                         documents=documents,
+                         settings=settings)
 
 @app.route('/lucky-draw/purchase', methods=['POST'])
 def purchase_ticket():
@@ -1021,6 +1030,116 @@ def admin_view_ticket(id):
     }
     
     return jsonify({'success': True, 'ticket': ticket_data})
+
+@app.route('/admin/lucky-draw/property-documents')
+@login_required
+def admin_property_documents():
+    if not current_user.is_admin:
+        flash('Access denied', 'error')
+        return redirect(url_for('index'))
+    
+    documents = PropertyDocument.query.order_by(PropertyDocument.order, PropertyDocument.created_at.desc()).all()
+    return render_template('admin/property_documents.html', documents=documents)
+
+@app.route('/admin/lucky-draw/property-documents/add', methods=['POST'])
+@login_required
+def admin_add_property_document():
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    title = request.form.get('title')
+    description = request.form.get('description', '')
+    
+    if not title:
+        return jsonify({'success': False, 'message': 'Title is required'}), 400
+    
+    # Handle file upload
+    if 'document_file' not in request.files:
+        return jsonify({'success': False, 'message': 'No file uploaded'}), 400
+    
+    file = request.files['document_file']
+    if file.filename == '':
+        return jsonify({'success': False, 'message': 'No file selected'}), 400
+    
+    if file:
+        filename = secure_filename(file.filename)
+        file_ext = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+        filename = f"property_doc_{datetime.now().timestamp()}_{filename}"
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        
+        document = PropertyDocument(
+            title=title,
+            description=description,
+            file_url=f"/static/uploads/{filename}",
+            file_type=file_ext,
+            order=PropertyDocument.query.count()
+        )
+        db.session.add(document)
+        db.session.commit()
+        
+        return jsonify({'success': True, 'message': 'Document added successfully'})
+    
+    return jsonify({'success': False, 'message': 'Upload failed'}), 500
+
+@app.route('/admin/lucky-draw/property-documents/delete/<int:id>', methods=['POST'])
+@login_required
+def admin_delete_property_document(id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    document = PropertyDocument.query.get_or_404(id)
+    
+    # Delete file from filesystem
+    if document.file_url:
+        file_path = os.path.join(app.root_path, document.file_url.lstrip('/'))
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except Exception as e:
+                print(f"Error deleting file: {e}")
+    
+    db.session.delete(document)
+    db.session.commit()
+    
+    return jsonify({'success': True})
+
+@app.route('/admin/lucky-draw/property-documents/toggle/<int:id>', methods=['POST'])
+@login_required
+def admin_toggle_property_document(id):
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    document = PropertyDocument.query.get_or_404(id)
+    document.active = not document.active
+    db.session.commit()
+    
+    return jsonify({'success': True, 'active': document.active})
+
+@app.route('/admin/lucky-draw/settings', methods=['GET', 'POST'])
+@login_required
+def admin_lucky_draw_settings():
+    if not current_user.is_admin:
+        flash('Access denied', 'error')
+        return redirect(url_for('index'))
+    
+    settings = LuckyDrawSettings.query.first()
+    if not settings:
+        settings = LuckyDrawSettings()
+        db.session.add(settings)
+        db.session.commit()
+    
+    if request.method == 'POST':
+        settings.ticket_price = int(request.form.get('ticket_price', 999))
+        settings.prize_title = request.form.get('prize_title', '')
+        settings.prize_description = request.form.get('prize_description', '')
+        db.session.commit()
+        
+        flash('Lucky Draw settings updated successfully!', 'success')
+        return redirect(url_for('admin_lucky_draw_settings'))
+    
+    return render_template('admin/lucky_draw_settings.html', settings=settings)
 
 @app.route('/admin/lucky-draw/payment-settings', methods=['GET', 'POST'])
 @login_required

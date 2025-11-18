@@ -171,3 +171,30 @@ class PaymentSettings(db.Model):
     def __repr__(self):
         return f'<PaymentSettings {self.id}>'
 
+class PropertyDocument(db.Model):
+    __tablename__ = 'property_documents'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    file_url = db.Column(db.String(300), nullable=False)
+    file_type = db.Column(db.String(50))  # pdf, jpg, png, etc.
+    description = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<PropertyDocument {self.title}>'
+
+class LuckyDrawSettings(db.Model):
+    __tablename__ = 'lucky_draw_settings'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    ticket_price = db.Column(db.Integer, default=999)
+    prize_title = db.Column(db.String(200), default='Premium 3BHK East-Facing Corner Flat')
+    prize_description = db.Column(db.Text)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    def __repr__(self):
+        return f'<LuckyDrawSettings {self.id}>'
+

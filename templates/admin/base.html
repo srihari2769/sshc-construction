@@ -33,11 +33,17 @@
                 </a>
                 <div class="sidebar-section">
                     <div class="section-title">Lucky Draw</div>
-                    <a href="{{ url_for('admin_lucky_draw') }}" class="{% if 'lucky_draw' in request.endpoint and 'tickets' not in request.endpoint and 'payment' not in request.endpoint %}active{% endif %}">
+                    <a href="{{ url_for('admin_lucky_draw') }}" class="{% if 'lucky_draw' in request.endpoint and 'tickets' not in request.endpoint and 'payment' not in request.endpoint and 'settings' not in request.endpoint and 'documents' not in request.endpoint %}active{% endif %}">
                         <i class="fas fa-ticket-alt"></i> Series
                     </a>
                     <a href="{{ url_for('admin_lucky_draw_tickets') }}" class="{% if 'lucky_draw_tickets' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-list"></i> Tickets
+                    </a>
+                    <a href="{{ url_for('admin_lucky_draw_settings') }}" class="{% if 'lucky_draw_settings' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-cog"></i> Settings & Price
+                    </a>
+                    <a href="{{ url_for('admin_property_documents') }}" class="{% if 'property_documents' in request.endpoint %}active{% endif %}">
+                        <i class="fas fa-file-alt"></i> Property Documents
                     </a>
                     <a href="{{ url_for('admin_payment_settings') }}" class="{% if 'payment_settings' in request.endpoint %}active{% endif %}">
                         <i class="fas fa-credit-card"></i> Payment Settings

@@ -1,0 +1,122 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Lucky Draw Settings - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <h1>Lucky Draw Settings</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('admin_lucky_draw_settings') }}">
+            <div class="form-group">
+                <label for="ticket_price">Ticket Price (₹) *</label>
+                <input type="number" id="ticket_price" name="ticket_price" 
+                       class="form-control" value="{{ settings.ticket_price }}" 
+                       min="1" required>
+                <small class="form-text text-muted">Set the price for each lucky draw ticket</small>
+            </div>
+
+            <div class="form-group">
+                <label for="prize_title">Prize Title</label>
+                <input type="text" id="prize_title" name="prize_title" 
+                       class="form-control" value="{{ settings.prize_title }}"
+                       placeholder="e.g., Premium 3BHK East-Facing Corner Flat">
+                <small class="form-text text-muted">Main prize description shown on the page</small>
+            </div>
+
+            <div class="form-group">
+                <label for="prize_description">Prize Description</label>
+                <textarea id="prize_description" name="prize_description" 
+                          class="form-control" rows="4">{{ settings.prize_description }}</textarea>
+                <small class="form-text text-muted">Detailed prize description with features</small>
+            </div>
+
+            <div class="current-settings">
+                <h3>Current Settings Preview</h3>
+                <div class="preview-box">
+                    <p><strong>Ticket Price:</strong> ₹{{ settings.ticket_price }}</p>
+                    <p><strong>Prize:</strong> {{ settings.prize_title }}</p>
+                    {% if settings.prize_description %}
+                    <p><strong>Description:</strong> {{ settings.prize_description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-save"></i> Save Settings
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+.admin-header {
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 15px;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.form-text {
+    display: block;
+    margin-top: 5px;
+    color: #6c757d;
+}
+
+.current-settings {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 30px 0;
+}
+
+.current-settings h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.preview-box {
+    background: white;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.preview-box p {
+    margin: 10px 0;
+}
+
+.preview-box p strong {
+    color: #495057;
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 16px;
+}
+</style>
+{% endblock %}

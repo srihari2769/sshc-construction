@@ -6,7 +6,7 @@
 <section class="page-header">
     <div class="container">
         <h1>Lucky Draw</h1>
-        <p>Win Amazing Prizes - Only ₹999 per Ticket!</p>
+        <p>Win Amazing Prizes - Only ₹{{ settings.ticket_price }} per Ticket!</p>
     </div>
 </section>
 
@@ -16,6 +16,35 @@
         <div class="lucky-draw-description">
             <div class="description-content">
                 {{ payment_settings.lucky_draw_description|safe }}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Property Documents Section -->
+        {% if documents %}
+        <div class="property-documents">
+            <h2><i class="fas fa-file-alt"></i> Property Documents</h2>
+            <div class="documents-grid">
+                {% for doc in documents %}
+                <div class="document-card">
+                    <div class="document-icon">
+                        {% if doc.file_type == 'pdf' %}
+                        <i class="fas fa-file-pdf"></i>
+                        {% else %}
+                        <i class="fas fa-file-image"></i>
+                        {% endif %}
+                    </div>
+                    <div class="document-info">
+                        <h3>{{ doc.title }}</h3>
+                        {% if doc.description %}
+                        <p>{{ doc.description }}</p>
+                        {% endif %}
+                        <a href="{{ doc.file_url }}" target="_blank" class="btn btn-sm btn-primary" download>
+                            <i class="fas fa-download"></i> Download
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
         </div>
         {% endif %}
@@ -327,6 +356,72 @@
     border: 1px solid #ffeaa7;
 }
 
+/* Property Documents */
+.property-documents {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
+}
+
+.property-documents h2 {
+    color: #333;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.property-documents h2 i {
+    color: #667eea;
+}
+
+.documents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.document-card {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #e9ecef;
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+}
+
+.document-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.document-icon {
+    font-size: 2.5rem;
+    color: #667eea;
+    flex-shrink: 0;
+}
+
+.document-info h3 {
+    margin: 0 0 8px 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.document-info p {
+    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.document-info .btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+}
+
 @media (max-width: 768px) {
     .series-grid {
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -336,6 +431,16 @@
     .purchase-form-container {
         margin-top: 30px;
         position: static;
+    }
+    
+    .documents-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .document-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 }
 </style>
