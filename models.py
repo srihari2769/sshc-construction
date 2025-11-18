@@ -163,7 +163,8 @@ class PaymentSettings(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     upi_id = db.Column(db.String(100))
-    qr_code_image = db.Column(db.String(300))
+    qr_code_image = db.Column(db.String(300))  # File path (ephemeral on Render)
+    qr_code_base64 = db.Column(db.Text)  # Base64 encoded image (persistent)
     payment_instructions = db.Column(db.Text)
     lucky_draw_description = db.Column(db.Text)  # Description about the lucky draw
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

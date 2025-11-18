@@ -7,6 +7,7 @@ from models import db, User, Project, ProjectMedia, Service, Testimonial, Contac
 import os
 import random
 import string
+import base64
 from datetime import datetime
 from twilio.rest import Client
 
@@ -1159,14 +1160,24 @@ def admin_payment_settings():
         payment_settings.payment_instructions = request.form.get('payment_instructions', '')
         payment_settings.lucky_draw_description = request.form.get('lucky_draw_description', '')
         
-        # Handle QR code upload
+        # Handle QR code upload - store as base64 for persistence across deployments
         if 'qr_code_image' in request.files:
             file = request.files['qr_code_image']
             if file and file.filename and allowed_file(file.filename):
+                # Read file and convert to base64
+                file_data = file.read()
+                file_ext = file.filename.rsplit('.', 1)[1].lower() if '.' in file.filename else 'jpg'
+                mime_type = f"image/{file_ext if file_ext != 'jpg' else 'jpeg'}"
+                base64_data = base64.b64encode(file_data).decode('utf-8')
+                payment_settings.qr_code_base64 = f"data:{mime_type};base64,{base64_data}"
+                
+                # Also save to filesystem for backup (will be ephemeral on Render)
                 filename = secure_filename(file.filename)
                 filename = f"qr_{datetime.now().timestamp()}_{filename}"
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                with open(file_path, 'wb') as f:
+                    f.write(file_data)
                 payment_settings.qr_code_image = f"/static/uploads/{filename}"
         
         db.session.commit()

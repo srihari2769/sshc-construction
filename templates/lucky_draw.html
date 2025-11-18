@@ -96,10 +96,18 @@
                             </div>
                             
                             <div id="qr-details" style="display: none;" class="payment-info">
-                                {% if payment_settings.qr_code_image %}
+                                {% if payment_settings and (payment_settings.qr_code_base64 or payment_settings.qr_code_image) %}
                                 <div class="qr-code-container">
-                                    <img src="{{ payment_settings.qr_code_image }}" alt="QR Code" class="qr-code-image">
+                                    <img src="{{ payment_settings.qr_code_base64 or payment_settings.qr_code_image }}" 
+                                         alt="QR Code" class="qr-code-image" 
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <div class="qr-error" style="display: none; text-align: center; padding: 20px; color: #dc3545;">
+                                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                                        <p>QR Code image not available. Please use UPI ID: <strong>{{ payment_settings.upi_id }}</strong></p>
+                                    </div>
                                 </div>
+                                {% else %}
+                                <p class="text-muted text-center">QR Code not configured. Please use UPI payment.</p>
                                 {% endif %}
                             </div>
                             

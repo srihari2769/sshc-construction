@@ -14,3 +14,6 @@ python migrate_email_optional.py
 
 # Add property documents and settings tables
 python migrate_add_documents_and_settings.py
+
+# Add QR code base64 column for persistent storage
+python migrate_add_qr_base64.py

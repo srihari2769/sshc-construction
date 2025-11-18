@@ -21,14 +21,25 @@
             
             <div class="form-group">
                 <label>QR Code Image</label>
-                {% if payment_settings and payment_settings.qr_code_image %}
+                {% if payment_settings and (payment_settings.qr_code_base64 or payment_settings.qr_code_image) %}
                 <div class="current-qr">
                     <p>Current QR Code:</p>
-                    <img src="{{ payment_settings.qr_code_image }}" alt="Current QR Code" style="max-width: 300px; border: 1px solid #ddd; padding: 10px;">
+                    <img src="{{ payment_settings.qr_code_base64 or payment_settings.qr_code_image }}" 
+                         alt="Current QR Code" 
+                         style="max-width: 300px; border: 1px solid #ddd; padding: 10px;"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <div style="display: none; color: #dc3545; padding: 10px; border: 1px solid #dc3545; background: #fff5f5;">
+                        ⚠️ QR Code image file is missing or corrupted. Please upload a new one.
+                    </div>
+                    {% if payment_settings.qr_code_base64 %}
+                    <p style="margin-top: 10px;"><small><span style="color: green;">✓</span> Stored in database (persistent across deployments)</small></p>
+                    {% else %}
+                    <p style="margin-top: 10px;"><small><span style="color: orange;">⚠</span> File path: {{ payment_settings.qr_code_image }} (ephemeral - will be lost on redeployment)</small></p>
+                    {% endif %}
                 </div>
                 {% endif %}
                 <input type="file" name="qr_code_image" class="form-control" accept="image/*">
-                <small class="form-text text-muted">Upload QR code image for payment (Optional)</small>
+                <small class="form-text text-muted">Upload QR code image for payment (will be stored in database)</small>
             </div>
             
             <div class="form-group">
