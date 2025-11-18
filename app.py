@@ -8,6 +8,7 @@ import os
 import random
 import string
 from datetime import datetime
+from twilio.rest import Client
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -18,6 +19,14 @@ mail = Mail(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
+
+# Initialize Twilio client
+twilio_client = None
+if app.config.get('TWILIO_ACCOUNT_SID') and app.config.get('TWILIO_AUTH_TOKEN'):
+    twilio_client = Client(
+        app.config.get('TWILIO_ACCOUNT_SID'),
+        app.config.get('TWILIO_AUTH_TOKEN')
+    )
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -141,23 +150,63 @@ def send_ticket_confirmation_email(ticket):
         raise
 
 def send_ticket_sms(ticket):
-    """Send SMS notification to customer after ticket purchase"""
+    """Send SMS notification to customer after ticket purchase using Twilio"""
     try:
+        # Check if Twilio is configured
+        if not twilio_client:
+            print("⚠️ Twilio not configured. Skipping SMS.")
+            return False
+        
+        if not app.config.get('TWILIO_PHONE_NUMBER'):
+            print("⚠️ TWILIO_PHONE_NUMBER not configured. Skipping SMS.")
+            return False
+        
         print(f"📱 Preparing to send SMS to: {ticket.customer_phone}")
         
+        # Format phone number - Twilio requires E.164 format (+[country code][number])
+        customer_phone = ticket.customer_phone.strip()
+        
+        # If phone doesn't start with +, assume India (+91)
+        if not customer_phone.startswith('+'):
+            if customer_phone.startswith('91'):
+                customer_phone = '+' + customer_phone
+            elif customer_phone.startswith('0'):
+                customer_phone = '+91' + customer_phone[1:]  # Remove leading 0
+            else:
+                customer_phone = '+91' + customer_phone
+        
         # Prepare SMS message
-        message = f"🎉 Lucky Draw Ticket Purchased!\n\nTicket: {ticket.ticket_number}\nSeries: {ticket.series.series_name}\nName: {ticket.customer_name}\nStatus: Pending Confirmation\n\nThank you! - SSHC Builders"
+        if ticket.status == 'confirmed':
+            message_body = f"""🎉 CONFIRMED - Lucky Draw Ticket!
+
+Ticket: {ticket.ticket_number}
+Series: {ticket.series.series_name}
+Name: {ticket.customer_name}
+Status: CONFIRMED ✅
+
+Good luck in the draw!
+- SSHC Builders"""
+        else:
+            message_body = f"""🎫 Lucky Draw Ticket Purchased!
+
+Ticket: {ticket.ticket_number}
+Series: {ticket.series.series_name}
+Name: {ticket.customer_name}
+Status: Pending Admin Confirmation
+
+You will receive another SMS once confirmed.
+Thank you! - SSHC Builders"""
         
-        # TODO: Integrate with SMS service (Twilio, MSG91, or AWS SNS)
-        # For now, just log the message
-        print(f"📱 SMS Message:\n{message}")
-        print(f"✅ SMS would be sent to: {ticket.customer_phone}")
+        # Send SMS via Twilio
+        print(f"📱 Sending SMS via Twilio...")
+        message = twilio_client.messages.create(
+            body=message_body,
+            from_=app.config.get('TWILIO_PHONE_NUMBER'),
+            to=customer_phone
+        )
         
-        # When you integrate SMS service, use:
-        # - Twilio: https://www.twilio.com/docs/sms/quickstart/python
-        # - MSG91: https://msg91.com/
-        # - AWS SNS: https://boto3.amazonaws.com/v1/documentation/api/latest/guide/sns-examples.html
-        
+        print(f"✅ SMS sent successfully! Message SID: {message.sid}")
+        print(f"   To: {customer_phone}")
         return True
         
     except Exception as e:
