@@ -17,6 +17,35 @@
     </div>
 </div>
 
+<!-- Referral Code Search -->
+<div class="card" style="margin-bottom: 20px;">
+    <div class="card-body">
+        <h3 style="margin-top: 0;">🔍 Search by Referral Code</h3>
+        <form id="referSearchForm" style="display: flex; gap: 10px; align-items: flex-end;">
+            <div style="flex: 1;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Enter Refer Code:</label>
+                <input type="text" id="referCodeSearch" class="form-control" placeholder="e.g., FRIEND123" 
+                       style="padding: 10px; border: 2px solid #ddd; border-radius: 5px;">
+            </div>
+            <button type="submit" class="btn btn-primary" style="padding: 10px 20px;">
+                <i class="fas fa-search"></i> Search
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="clearReferSearch()" style="padding: 10px 20px;">
+                Clear
+            </button>
+        </form>
+        <div id="referSearchResults" style="margin-top: 20px; display: none;">
+            <div id="referStats" style="background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #667eea;">
+                <h4 style="margin: 0 0 10px 0; color: #667eea;">Search Results</h4>
+                <p style="margin: 5px 0;"><strong>Refer Code:</strong> <span id="searchedCode"></span></p>
+                <p style="margin: 5px 0;"><strong>Total Tickets Sold:</strong> <span id="totalTickets" style="font-size: 1.5rem; color: #28a745; font-weight: bold;"></span></p>
+                <p style="margin: 5px 0;"><strong>Confirmed:</strong> <span id="confirmedTickets"></span> | <strong>Pending:</strong> <span id="pendingTickets"></span> | <strong>Cancelled:</strong> <span id="cancelledTickets"></span></p>
+            </div>
+            <div id="referTicketsList" style="margin-top: 15px;"></div>
+        </div>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -189,6 +218,85 @@ function deleteTicket(ticketId) {
             }
         });
     }
+}
+
+// Referral Code Search
+document.getElementById('referSearchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const referCode = document.getElementById('referCodeSearch').value.trim();
+    
+    if (!referCode) {
+        alert('Please enter a referral code');
+        return;
+    }
+    
+    // Fetch tickets by refer code
+    fetch(`/admin/lucky-draw/tickets/search-refer?code=${encodeURIComponent(referCode)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayReferResults(data.tickets, referCode);
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Error searching referral code');
+            console.error(error);
+        });
+});
+
+function displayReferResults(tickets, code) {
+    const resultsDiv = document.getElementById('referSearchResults');
+    const statsDiv = document.getElementById('referStats');
+    
+    if (tickets.length === 0) {
+        resultsDiv.style.display = 'block';
+        document.getElementById('searchedCode').textContent = code;
+        document.getElementById('totalTickets').textContent = '0';
+        document.getElementById('confirmedTickets').textContent = '0';
+        document.getElementById('pendingTickets').textContent = '0';
+        document.getElementById('cancelledTickets').textContent = '0';
+        document.getElementById('referTicketsList').innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">No tickets found with this referral code.</p>';
+        return;
+    }
+    
+    // Calculate stats
+    const confirmed = tickets.filter(t => t.status === 'confirmed').length;
+    const pending = tickets.filter(t => t.status === 'pending').length;
+    const cancelled = tickets.filter(t => t.status === 'cancelled').length;
+    
+    // Update stats
+    document.getElementById('searchedCode').textContent = code;
+    document.getElementById('totalTickets').textContent = tickets.length;
+    document.getElementById('confirmedTickets').textContent = confirmed;
+    document.getElementById('pendingTickets').textContent = pending;
+    document.getElementById('cancelledTickets').textContent = cancelled;
+    
+    // Display tickets list
+    let ticketsHtml = '<table class="table" style="margin-top: 15px;"><thead><tr><th>Ticket #</th><th>Customer</th><th>Phone</th><th>Status</th><th>Date</th></tr></thead><tbody>';
+    
+    tickets.forEach(ticket => {
+        const badgeClass = ticket.status === 'confirmed' ? 'badge-success' : ticket.status === 'pending' ? 'badge-warning' : 'badge-danger';
+        ticketsHtml += `
+            <tr>
+                <td><strong>${ticket.ticket_number}</strong></td>
+                <td>${ticket.customer_name}</td>
+                <td>${ticket.customer_phone}</td>
+                <td><span class="badge ${badgeClass}">${ticket.status.toUpperCase()}</span></td>
+                <td>${ticket.purchase_date}</td>
+            </tr>
+        `;
+    });
+    
+    ticketsHtml += '</tbody></table>';
+    document.getElementById('referTicketsList').innerHTML = ticketsHtml;
+    resultsDiv.style.display = 'block';
+}
+
+function clearReferSearch() {
+    document.getElementById('referCodeSearch').value = '';
+    document.getElementById('referSearchResults').style.display = 'none';
 }
 </script>
 

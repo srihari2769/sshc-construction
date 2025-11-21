@@ -55,6 +55,9 @@
                 <div class="purchase-form-wrapper">
                 <div class="purchase-form-container">
                     <h2>Purchase Ticket</h2>
+                    <div class="ticket-price-badge">
+                        <i class="fas fa-tag"></i> Ticket Price: <strong>₹{{ settings.ticket_price }}</strong>
+                    </div>
                     
                     <form action="{{ url_for('purchase_ticket') }}" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
@@ -434,6 +437,26 @@
 .document-info .btn {
     padding: 6px 12px;
     font-size: 0.85rem;
+}
+
+.ticket-price-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.ticket-price-badge i {
+    margin-right: 8px;
+}
+
+.ticket-price-badge strong {
+    font-size: 1.3rem;
+    font-weight: 700;
 }
 
 @media (max-width: 768px) {

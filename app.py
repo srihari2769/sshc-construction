@@ -1009,6 +1009,30 @@ def admin_delete_ticket(id):
     flash(f'Ticket {ticket_number} deleted successfully!', 'success')
     return jsonify({'success': True})
 
+@app.route('/admin/lucky-draw/tickets/search-refer')
+@login_required
+def admin_search_refer():
+    if not current_user.is_admin:
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    refer_code = request.args.get('code', '').strip()
+    
+    if not refer_code:
+        return jsonify({'success': False, 'message': 'Referral code is required'}), 400
+    
+    # Search for tickets with this refer code
+    tickets = LuckyDrawTicket.query.filter_by(refer_code=refer_code).order_by(LuckyDrawTicket.purchase_date.desc()).all()
+    
+    tickets_data = [{
+        'ticket_number': ticket.ticket_number,
+        'customer_name': ticket.customer_name,
+        'customer_phone': ticket.customer_phone,
+        'status': ticket.status,
+        'purchase_date': ticket.purchase_date.strftime('%d %b %Y %H:%M')
+    } for ticket in tickets]
+    
+    return jsonify({'success': True, 'tickets': tickets_data})
+
 @app.route('/admin/lucky-draw/tickets/view/<int:id>')
 @login_required
 def admin_view_ticket(id):
