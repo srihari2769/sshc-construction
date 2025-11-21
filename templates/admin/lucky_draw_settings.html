@@ -11,11 +11,20 @@
     <div class="card-body">
         <form method="POST" action="{{ url_for('admin_lucky_draw_settings') }}">
             <div class="form-group">
-                <label for="ticket_price">Ticket Price (₹) *</label>
+                <label for="ticket_price">Ticket Price (₹)</label>
                 <input type="number" id="ticket_price" name="ticket_price" 
-                       class="form-control" value="{{ settings.ticket_price }}" 
-                       min="1" required>
-                <small class="form-text text-muted">Set the price for each lucky draw ticket</small>
+                       class="form-control" value="{{ settings.ticket_price if settings.ticket_price else '' }}" 
+                       min="1" placeholder="Enter ticket price (optional)">
+                <small class="form-text text-muted">Set the price for each lucky draw ticket (leave empty if not applicable)</small>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show_ticket_price" name="show_ticket_price" 
+                           value="1" {{ 'checked' if settings.show_ticket_price else '' }}>
+                    <span>Show Ticket Price Badge on Purchase Form</span>
+                </label>
+                <small class="form-text text-muted">Toggle to show or hide the ticket price badge on the purchase page</small>
             </div>
 
             <div class="form-group">
@@ -36,7 +45,8 @@
             <div class="current-settings">
                 <h3>Current Settings Preview</h3>
                 <div class="preview-box">
-                    <p><strong>Ticket Price:</strong> ₹{{ settings.ticket_price }}</p>
+                    <p><strong>Ticket Price:</strong> {{ '₹' + settings.ticket_price|string if settings.ticket_price else 'Not set' }}</p>
+                    <p><strong>Show Price Badge:</strong> {{ 'Yes' if settings.show_ticket_price else 'No' }}</p>
                     <p><strong>Prize:</strong> {{ settings.prize_title }}</p>
                     {% if settings.prize_description %}
                     <p><strong>Description:</strong> {{ settings.prize_description }}</p>
@@ -78,6 +88,24 @@
 .form-control:focus {
     outline: none;
     border-color: #007bff;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.checkbox-label span {
+    color: #333;
 }
 
 .form-text {

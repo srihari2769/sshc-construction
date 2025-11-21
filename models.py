@@ -195,7 +195,8 @@ class LuckyDrawSettings(db.Model):
     __tablename__ = 'lucky_draw_settings'
     
     id = db.Column(db.Integer, primary_key=True)
-    ticket_price = db.Column(db.Integer, default=999)
+    ticket_price = db.Column(db.Integer, nullable=True)  # Made optional
+    show_ticket_price = db.Column(db.Boolean, default=True)  # Toggle to show/hide price badge
     prize_title = db.Column(db.String(200), default='Premium 3BHK East-Facing Corner Flat')
     prize_description = db.Column(db.Text)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

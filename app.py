@@ -1200,7 +1200,10 @@ def admin_lucky_draw_settings():
         db.session.commit()
     
     if request.method == 'POST':
-        settings.ticket_price = int(request.form.get('ticket_price', 999))
+        # Handle optional ticket price
+        ticket_price_str = request.form.get('ticket_price', '').strip()
+        settings.ticket_price = int(ticket_price_str) if ticket_price_str else None
+        settings.show_ticket_price = bool(request.form.get('show_ticket_price'))
         settings.prize_title = request.form.get('prize_title', '')
         settings.prize_description = request.form.get('prize_description', '')
         db.session.commit()

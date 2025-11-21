@@ -24,5 +24,8 @@ python migrate_add_refer_code.py
 # Add base64 columns for persistent image storage
 python migrate_add_image_base64.py
 
+# Add show_ticket_price toggle and make ticket_price optional
+python migrate_add_price_toggle.py
+
 # Initialize database tables (creates tables if they don't exist and seeds data)
 python init_db.py

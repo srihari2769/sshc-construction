@@ -6,7 +6,11 @@
 <section class="page-header">
     <div class="container">
         <h1>Lucky Draw</h1>
+        {% if settings.ticket_price %}
         <p>Win Amazing Prizes - Only ₹{{ settings.ticket_price }} per Ticket!</p>
+        {% else %}
+        <p>Win Amazing Prizes!</p>
+        {% endif %}
     </div>
 </section>
 
@@ -55,9 +59,11 @@
                 <div class="purchase-form-wrapper">
                 <div class="purchase-form-container">
                     <h2>Purchase Ticket</h2>
+                    {% if settings.show_ticket_price and settings.ticket_price %}
                     <div class="ticket-price-badge">
                         <i class="fas fa-tag"></i> Ticket Price: <strong>₹{{ settings.ticket_price }}</strong>
                     </div>
+                    {% endif %}
                     
                     <form action="{{ url_for('purchase_ticket') }}" method="POST" enctype="multipart/form-data">
                         <div class="form-group">
