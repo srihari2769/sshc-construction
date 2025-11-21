@@ -148,6 +148,7 @@ class LuckyDrawTicket(db.Model):
     customer_email = db.Column(db.String(120), nullable=True)  # Made optional for SMS-only flow
     customer_phone = db.Column(db.String(20), nullable=False)
     customer_address = db.Column(db.Text)
+    refer_code = db.Column(db.String(50))  # Optional referral code
     payment_method = db.Column(db.String(20), default='upi')  # upi, qr
     transaction_id = db.Column(db.String(100))
     payment_screenshot = db.Column(db.String(300))

@@ -300,6 +300,12 @@ function viewTicketDetails(ticketId) {
                         <div class="detail-label">Address:</div>
                         <div class="detail-value">${ticket.customer_address || '-'}</div>
                     </div>
+                    ${ticket.refer_code ? `
+                    <div class="detail-row">
+                        <div class="detail-label">Refer Code:</div>
+                        <div class="detail-value"><strong style="color: #667eea;">${ticket.refer_code}</strong></div>
+                    </div>
+                    ` : ''}
                     <div class="detail-row">
                         <div class="detail-label">Payment Method:</div>
                         <div class="detail-value">${ticket.payment_method.toUpperCase()}</div>

@@ -17,3 +17,6 @@ python migrate_add_documents_and_settings.py
 
 # Add QR code base64 column for persistent storage
 python migrate_add_qr_base64.py
+
+# Add refer code column to lucky draw tickets
+python migrate_add_refer_code.py

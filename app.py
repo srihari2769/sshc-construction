@@ -774,6 +774,7 @@ def purchase_ticket():
     customer_email = request.form['customer_email']
     customer_phone = request.form['customer_phone']
     customer_address = request.form.get('customer_address', '')
+    refer_code = request.form.get('refer_code', '')
     payment_method = request.form['payment_method']
     transaction_id = request.form.get('transaction_id', '')
     
@@ -833,6 +834,7 @@ def purchase_ticket():
         customer_email=customer_email,
         customer_phone=customer_phone,
         customer_address=customer_address,
+        refer_code=refer_code,
         payment_method=payment_method,
         transaction_id=transaction_id,
         payment_screenshot=payment_screenshot,
@@ -1022,6 +1024,7 @@ def admin_view_ticket(id):
         'customer_email': ticket.customer_email,
         'customer_phone': ticket.customer_phone,
         'customer_address': ticket.customer_address,
+        'refer_code': ticket.refer_code,
         'payment_method': ticket.payment_method,
         'transaction_id': ticket.transaction_id,
         'payment_screenshot': ticket.payment_screenshot,
