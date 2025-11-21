@@ -62,6 +62,7 @@ class Service(db.Model):
     description = db.Column(db.Text, nullable=False)
     icon = db.Column(db.String(50))
     image_url = db.Column(db.String(300))
+    image_base64 = db.Column(db.Text)  # Base64 encoded image (persistent)
     order = db.Column(db.Integer, default=0)
     active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -151,7 +152,8 @@ class LuckyDrawTicket(db.Model):
     refer_code = db.Column(db.String(50))  # Optional referral code
     payment_method = db.Column(db.String(20), default='upi')  # upi, qr
     transaction_id = db.Column(db.String(100))
-    payment_screenshot = db.Column(db.String(300))
+    payment_screenshot = db.Column(db.String(300))  # File path (ephemeral on Render)
+    payment_screenshot_base64 = db.Column(db.Text)  # Base64 encoded image (persistent)
     status = db.Column(db.String(20), default='pending')  # pending, confirmed, cancelled
     purchase_date = db.Column(db.DateTime, default=datetime.utcnow)
     confirmed_date = db.Column(db.DateTime)
@@ -179,6 +181,7 @@ class PropertyDocument(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     file_url = db.Column(db.String(300), nullable=False)
+    file_base64 = db.Column(db.Text)  # Base64 encoded file (persistent for images)
     file_type = db.Column(db.String(50))  # pdf, jpg, png, etc.
     description = db.Column(db.Text)
     order = db.Column(db.Integer, default=0)

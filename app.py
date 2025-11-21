@@ -524,6 +524,7 @@ def admin_add_service():
     
     if request.method == 'POST':
         image_url = ''
+        image_base64 = ''
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename and allowed_file(file.filename):
@@ -532,12 +533,22 @@ def admin_add_service():
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 image_url = f"/static/uploads/{filename}"
+                
+                # Store base64 for persistence
+                file.seek(0)  # Reset file pointer
+                image_data = file.read()
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
+                # Get file extension for data URL
+                ext = filename.rsplit('.', 1)[1].lower()
+                mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                image_base64 = f'data:{mime_type};base64,{image_base64}'
         
         service = Service(
             title=request.form['title'],
             description=request.form['description'],
             icon=request.form.get('icon', 'fa-building'),
             image_url=image_url,
+            image_base64=image_base64,
             order=int(request.form.get('order', 0)),
             active=bool(request.form.get('active', True))
         )
@@ -572,6 +583,15 @@ def admin_edit_service(id):
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 service.image_url = f"/static/uploads/{filename}"
+                
+                # Store base64 for persistence
+                file.seek(0)  # Reset file pointer
+                image_data = file.read()
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
+                # Get file extension for data URL
+                ext = filename.rsplit('.', 1)[1].lower()
+                mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                service.image_base64 = f'data:{mime_type};base64,{image_base64}'
         
         db.session.commit()
         flash('Service updated successfully!', 'success')
@@ -780,6 +800,7 @@ def purchase_ticket():
     
     # Handle payment screenshot upload
     payment_screenshot = ''
+    payment_screenshot_base64 = ''
     if 'payment_screenshot' in request.files:
         file = request.files['payment_screenshot']
         print(f"DEBUG: File received: {file.filename if file else 'No file'}")
@@ -792,6 +813,15 @@ def purchase_ticket():
             payment_screenshot = f"/static/uploads/{filename}"
             print(f"DEBUG: File saved at: {upload_path}")
             print(f"DEBUG: Payment screenshot path: {payment_screenshot}")
+            
+            # Store base64 for persistence
+            file.seek(0)  # Reset file pointer
+            image_data = file.read()
+            payment_screenshot_base64 = base64.b64encode(image_data).decode('utf-8')
+            # Get file extension for data URL
+            ext = filename.rsplit('.', 1)[1].lower()
+            mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+            payment_screenshot_base64 = f'data:{mime_type};base64,{payment_screenshot_base64}'
         else:
             print(f"DEBUG: File validation failed or no filename")
     else:
@@ -838,6 +868,7 @@ def purchase_ticket():
         payment_method=payment_method,
         transaction_id=transaction_id,
         payment_screenshot=payment_screenshot,
+        payment_screenshot_base64=payment_screenshot_base64,
         status='pending'
     )
     
@@ -1051,7 +1082,7 @@ def admin_view_ticket(id):
         'refer_code': ticket.refer_code,
         'payment_method': ticket.payment_method,
         'transaction_id': ticket.transaction_id,
-        'payment_screenshot': ticket.payment_screenshot,
+        'payment_screenshot': ticket.payment_screenshot_base64 if ticket.payment_screenshot_base64 else ticket.payment_screenshot,
         'status': ticket.status,
         'purchase_date': ticket.purchase_date.strftime('%d %b %Y %H:%M'),
         'confirmed_date': ticket.confirmed_date.strftime('%d %b %Y %H:%M') if ticket.confirmed_date else None
@@ -1097,10 +1128,20 @@ def admin_add_property_document():
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(file_path)
         
+        # Store base64 for images only (PDFs stay as file paths)
+        file_base64 = ''
+        if file_ext in ['jpg', 'jpeg', 'png', 'gif']:
+            file.seek(0)  # Reset file pointer
+            file_data = file.read()
+            file_base64 = base64.b64encode(file_data).decode('utf-8')
+            mime_type = f'image/{file_ext}' if file_ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+            file_base64 = f'data:{mime_type};base64,{file_base64}'
+        
         document = PropertyDocument(
             title=title,
             description=description,
             file_url=f"/static/uploads/{filename}",
+            file_base64=file_base64,
             file_type=file_ext,
             order=PropertyDocument.query.count()
         )

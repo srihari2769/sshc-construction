@@ -20,3 +20,6 @@ python migrate_add_qr_base64.py
 
 # Add refer code column to lucky draw tickets
 python migrate_add_refer_code.py
+
+# Add base64 columns for persistent image storage
+python migrate_add_image_base64.py

@@ -39,7 +39,7 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <a href="{{ doc.file_url }}" target="_blank" class="btn btn-sm btn-info" title="View">
+                                <a href="{{ doc.file_base64 if doc.file_base64 else doc.file_url }}" target="_blank" class="btn btn-sm btn-info" title="View">
                                     <i class="fas fa-eye"></i> View
                                 </a>
                                 <button class="btn btn-sm btn-warning" onclick="toggleDocument({{ doc.id }})" title="Toggle Status">

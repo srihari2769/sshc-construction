@@ -39,7 +39,7 @@
                         {% if doc.description %}
                         <p>{{ doc.description }}</p>
                         {% endif %}
-                        <a href="{{ doc.file_url }}" target="_blank" class="btn btn-sm btn-primary" download>
+                        <a href="{{ doc.file_base64 if doc.file_base64 else doc.file_url }}" target="_blank" class="btn btn-sm btn-primary" download>
                             <i class="fas fa-download"></i> Download
                         </a>
                     </div>
