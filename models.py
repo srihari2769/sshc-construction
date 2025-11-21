@@ -32,6 +32,7 @@ class Project(db.Model):
     client_name = db.Column(db.String(100))
     completion_date = db.Column(db.Date)
     image_url = db.Column(db.String(300))  # Main/thumbnail image
+    image_base64 = db.Column(db.Text)  # Base64 encoded image (persistent)
     featured = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
@@ -47,6 +48,7 @@ class ProjectMedia(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('projects.id'), nullable=False)
     file_url = db.Column(db.String(300), nullable=False)
+    file_base64 = db.Column(db.Text)  # Base64 encoded file (persistent for images)
     file_type = db.Column(db.String(20), nullable=False)  # 'image' or 'video'
     order = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

@@ -26,8 +26,8 @@
             {% for project in projects %}
             <tr>
                 <td>
-                    {% if project.image_url %}
-                    <img src="{{ project.image_url }}" alt="{{ project.title }}" class="table-thumbnail">
+                    {% if project.image_base64 or project.image_url %}
+                    <img src="{{ project.image_base64 if project.image_base64 else project.image_url }}" alt="{{ project.title }}" class="table-thumbnail">
                     {% else %}
                     <div class="table-placeholder"><i class="fas fa-image"></i></div>
                     {% endif %}

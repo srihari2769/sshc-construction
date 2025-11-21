@@ -335,6 +335,7 @@ def admin_add_project():
     if request.method == 'POST':
         # Handle main thumbnail image
         image_url = ''
+        image_base64 = ''
         if 'image' in request.files:
             file = request.files['image']
             if file and file.filename and allowed_file(file.filename):
@@ -343,6 +344,14 @@ def admin_add_project():
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 image_url = f"/static/uploads/{filename}"
+                
+                # Store base64 for persistence
+                file.seek(0)
+                image_data = file.read()
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
+                ext = filename.rsplit('.', 1)[1].lower()
+                mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                image_base64 = f'data:{mime_type};base64,{image_base64}'
         
         completion_date = None
         if request.form.get('completion_date'):
@@ -357,6 +366,7 @@ def admin_add_project():
             client_name=request.form.get('client_name', ''),
             completion_date=completion_date,
             image_url=image_url,
+            image_base64=image_base64,
             featured=bool(request.form.get('featured'))
         )
         db.session.add(project)
@@ -373,9 +383,18 @@ def admin_add_project():
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                     file_url = f"/static/uploads/{filename}"
                     
+                    # Store base64 for persistence
+                    file.seek(0)
+                    file_data = file.read()
+                    file_base64 = base64.b64encode(file_data).decode('utf-8')
+                    ext = filename.rsplit('.', 1)[1].lower()
+                    mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                    file_base64 = f'data:{mime_type};base64,{file_base64}'
+                    
                     media = ProjectMedia(
                         project_id=project.id,
                         file_url=file_url,
+                        file_base64=file_base64,
                         file_type='image',
                         order=idx
                     )
@@ -436,6 +455,14 @@ def admin_edit_project(id):
                 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                 project.image_url = f"/static/uploads/{filename}"
+                
+                # Store base64 for persistence
+                file.seek(0)
+                image_data = file.read()
+                image_base64 = base64.b64encode(image_data).decode('utf-8')
+                ext = filename.rsplit('.', 1)[1].lower()
+                mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                project.image_base64 = f'data:{mime_type};base64,{image_base64}'
         
         # Handle multiple additional images
         if 'images' in request.files:
@@ -448,9 +475,18 @@ def admin_edit_project(id):
                     file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
                     file_url = f"/static/uploads/{filename}"
                     
+                    # Store base64 for persistence
+                    file.seek(0)
+                    file_data = file.read()
+                    file_base64 = base64.b64encode(file_data).decode('utf-8')
+                    ext = filename.rsplit('.', 1)[1].lower()
+                    mime_type = f'image/{ext}' if ext in ['jpg', 'jpeg', 'png', 'gif'] else 'image/jpeg'
+                    file_base64 = f'data:{mime_type};base64,{file_base64}'
+                    
                     media = ProjectMedia(
                         project_id=project.id,
                         file_url=file_url,
+                        file_base64=file_base64,
                         file_type='image',
                         order=idx
                     )

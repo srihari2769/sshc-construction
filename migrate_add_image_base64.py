@@ -4,6 +4,8 @@ Adds:
 - image_base64 to services table
 - payment_screenshot_base64 to lucky_draw_tickets table
 - file_base64 to property_documents table
+- image_base64 to projects table
+- file_base64 to project_media table
 """
 
 import os
@@ -28,6 +30,18 @@ def run_migration():
             # Add file_base64 column to property_documents table
             db.session.execute(db.text("""
                 ALTER TABLE property_documents 
+                ADD COLUMN IF NOT EXISTS file_base64 TEXT;
+            """))
+            
+            # Add image_base64 column to projects table
+            db.session.execute(db.text("""
+                ALTER TABLE projects 
+                ADD COLUMN IF NOT EXISTS image_base64 TEXT;
+            """))
+            
+            # Add file_base64 column to project_media table
+            db.session.execute(db.text("""
+                ALTER TABLE project_media 
                 ADD COLUMN IF NOT EXISTS file_base64 TEXT;
             """))
             

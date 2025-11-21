@@ -29,7 +29,7 @@
                     {% for media in project.media %}
                         {% if media.file_type == 'image' %}
                         <div class="gallery-item">
-                            <img src="{{ media.file_url }}" alt="{{ project.title }} - Image {{ loop.index }}" loading="lazy">
+                            <img src="{{ media.file_base64 if media.file_base64 else media.file_url }}" alt="{{ project.title }} - Image {{ loop.index }}" loading="lazy">
                         </div>
                         {% endif %}
                     {% endfor %}

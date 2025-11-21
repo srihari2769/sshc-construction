@@ -25,8 +25,8 @@
             {% for project in projects %}
             <div class="project-card">
                 <div class="project-image">
-                    {% if project.image_url %}
-                    <img src="{{ project.image_url }}" alt="{{ project.title }}">
+                    {% if project.image_base64 or project.image_url %}
+                    <img src="{{ project.image_base64 if project.image_base64 else project.image_url }}" alt="{{ project.title }}">
                     {% else %}
                     <div class="project-placeholder">
                         <i class="fas fa-building"></i>
